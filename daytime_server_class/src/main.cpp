@@ -47,9 +47,13 @@ private:
 class daytime_server
 {
 public:
-    daytime_server(boost::asio::io_context & io):_io_context(io),_acceptor(io)
+    daytime_server(boost::asio::io_context & io):_io_context(io),_acceptor(io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),13))
     {   
         init();
+    }
+    ~daytime_server()
+    {
+        _acceptor.close();
     }
     // 设置地址和端口
     void init()
@@ -58,12 +62,11 @@ public:
         // _acceptor.bind(end);
         // use default backlog = 128
         _acceptor.listen();
-        std::cout << "testing" << std::endl;
+        start_accept();
     }
     void start_accept()
     {
         Connection con(_io_context);
-
         _acceptor.async_accept(con.socket(),boost::bind(&daytime_server::handler_func,this,boost::ref(con),boost::asio::placeholders::error));
     }
     void handler_func(Connection & con,const boost::system::error_code & ec)
@@ -85,6 +88,7 @@ int main(int argc,char * argv[])
 
     boost::asio::io_context io;
     daytime_server server(io);
+
     io.run();
     return EXIT_SUCCESS;
 }
