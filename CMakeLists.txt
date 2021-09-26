@@ -34,6 +34,8 @@ add_subdirectory(./daytime_client/)
 add_subdirectory(./daytime_server/)
 add_subdirectory(./echo_server/)
 add_subdirectory(./echo_client/)
+add_subdirectory(./timer_clock/)
+add_subdirectory(./daytime_server_class/)
 
 # target_link_libraries()
 
