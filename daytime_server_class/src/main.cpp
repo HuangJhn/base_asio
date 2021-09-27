@@ -13,11 +13,12 @@
 class Connection
 {
 public:
-    // 单例
-    static Connection * Instance(boost::asio::io_context & io)
+    // 最好是使用智能指针
+    static std::shared_ptr<Connection> Instance(boost::asio::io_context & io)
     {
-        static Connection * conn = new Connection(io);
-        return conn;
+        // static Connection * conn = new Connection(io);
+        // return conn;
+        return std::shared_ptr<Connection>(new Connection(io));
     }
     Connection(boost::asio::io_context & io):_socket(io)
     {
@@ -61,22 +62,17 @@ public:
     {
         _acceptor.close();
     }
-    // 设置地址和端口
     void init()
     {
-        boost::asio::ip::tcp::endpoint end(boost::asio::ip::tcp::v4(),13);
-        // _acceptor.bind(end);
-        // use default backlog = 128
         _acceptor.listen();
         start_accept();
     }
     void start_accept()
     {
-        // Connection con(_io_context);
-        Connection * con = Connection::Instance(_io_context);
+        std::shared_ptr<Connection> con = Connection::Instance(_io_context);
         _acceptor.async_accept(con->socket(),boost::bind(&daytime_server::handler_func,this,con,boost::asio::placeholders::error));
     }
-    void handler_func(Connection * con,const boost::system::error_code & ec)
+    void handler_func(std::shared_ptr<Connection> con,const boost::system::error_code & ec)
     {
         if(!ec)
         {
