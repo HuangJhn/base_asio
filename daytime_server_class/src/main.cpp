@@ -13,6 +13,12 @@
 class Connection
 {
 public:
+    // 单例
+    static Connection * Instance(boost::asio::io_context & io)
+    {
+        static Connection * conn = new Connection(io);
+        return conn;
+    }
     Connection(boost::asio::io_context & io):_socket(io)
     {
 
@@ -66,15 +72,16 @@ public:
     }
     void start_accept()
     {
-        Connection con(_io_context);
-        _acceptor.async_accept(con.socket(),boost::bind(&daytime_server::handler_func,this,boost::ref(con),boost::asio::placeholders::error));
+        // Connection con(_io_context);
+        Connection * con = Connection::Instance(_io_context);
+        _acceptor.async_accept(con->socket(),boost::bind(&daytime_server::handler_func,this,con,boost::asio::placeholders::error));
     }
-    void handler_func(Connection & con,const boost::system::error_code & ec)
+    void handler_func(Connection * con,const boost::system::error_code & ec)
     {
         if(!ec)
         {
-            con.start();
-            con.close();
+            con->start();
+            con->close();
         }
         start_accept();
     }
